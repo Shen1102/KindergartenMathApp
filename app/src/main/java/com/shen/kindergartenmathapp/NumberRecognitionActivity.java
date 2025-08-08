@@ -2,8 +2,6 @@ package com.shen.kindergartenmathapp;
 
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.GridLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,9 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.*;
 
-public class CountingActivity extends AppCompatActivity {
+public class NumberRecognitionActivity extends AppCompatActivity {
     private TextView titleText, questionText, scoreText;
-    private GridLayout objectsContainer;
     private Button[] opts;
     private Button btnMenu;
     private int answer;
@@ -21,18 +18,22 @@ public class CountingActivity extends AppCompatActivity {
     private int score = 0, total = 0;
     private final Random rand = new Random();
 
+    private static final String[] NUMBER_WORDS = {
+            "zero","one","two","three","four","five","six","seven","eight","nine","ten",
+            "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"
+    };
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_counting);
+        setContentView(R.layout.activity_number_recognition);
 
         String diff = getIntent().getStringExtra(MainActivity.EXTRA_DIFFICULTY);
-        if ("HARD".equals(diff)) { lo = 0; hi = 99; } else { lo = 0; hi = 10; }
+        if ("HARD".equals(diff)) { lo = 0; hi = 20; } else { lo = 0; hi = 10; }
 
         titleText = findViewById(R.id.titleText);
         questionText = findViewById(R.id.questionText);
         scoreText = findViewById(R.id.scoreText);
-        objectsContainer = findViewById(R.id.objectsContainer);
         btnMenu = findViewById(R.id.btnMenu);
 
         opts = new Button[]{
@@ -41,42 +42,29 @@ public class CountingActivity extends AppCompatActivity {
                 findViewById(R.id.opt3),
                 findViewById(R.id.opt4)
         };
-        for (Button b : opts) b.setOnClickListener(v -> onPick(Integer.parseInt(b.getText().toString())));
+        for (Button b : opts) b.setOnClickListener(v -> onPick(b.getText().toString()));
 
-        btnMenu.setOnClickListener(v -> finish()); // go back to main menu
+        btnMenu.setOnClickListener(v -> finish());
 
-        titleText.setText("Counting");
+        titleText.setText("Number Recognition");
         nextQuestion();
     }
 
     private void nextQuestion() {
-        int count = randInRange(lo, hi);
-        answer = count;
-        questionText.setText("How many stars are there?");
-        renderObjects(count);
+        answer = randInRange(lo, hi);
+        questionText.setText("Which word matches this number: " + answer + " ?");
 
-        Set<Integer> set = new HashSet<>();
-        set.add(answer);
-        while (set.size() < 4) set.add(randInRange(lo, hi));
-        List<Integer> list = new ArrayList<>(set);
+        Set<String> set = new HashSet<>();
+        set.add(NUMBER_WORDS[answer]);
+        while (set.size() < 4) set.add(NUMBER_WORDS[randInRange(lo, hi)]);
+        List<String> list = new ArrayList<>(set);
         Collections.shuffle(list, rand);
-        for (int i = 0; i < 4; i++) opts[i].setText(String.valueOf(list.get(i)));
+        for (int i = 0; i < 4; i++) opts[i].setText(list.get(i));
     }
 
-    private void renderObjects(int n) {
-        objectsContainer.removeAllViews();
-        int pad = dp(4);
-        for (int i = 0; i < n; i++) {
-            ImageView iv = new ImageView(this);
-            iv.setImageResource(R.drawable.ic_star_24);
-            iv.setPadding(pad, pad, pad, pad);
-            objectsContainer.addView(iv);
-        }
-    }
-
-    private void onPick(int picked) {
+    private void onPick(String pickedWord) {
         total++;
-        if (picked == answer) {
+        if (pickedWord.equalsIgnoreCase(NUMBER_WORDS[answer])) {
             score++;
             Toast.makeText(this, "Correct!", Toast.LENGTH_SHORT).show();
         } else {
@@ -87,6 +75,4 @@ public class CountingActivity extends AppCompatActivity {
     }
 
     private int randInRange(int a, int b) { return a + rand.nextInt(b - a + 1); }
-    private int dp(int v) { return Math.round(getResources().getDisplayMetrics().density * v); }
 }
-

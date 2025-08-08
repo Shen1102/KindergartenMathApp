@@ -8,31 +8,62 @@
     tools:context=".MainActivity">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
         android:orientation="vertical"
-        android:gravity="center"
-        android:padding="16dp">
+        android:gravity="center_horizontal"
+        android:padding="24dp"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+
+        <TextView
+            android:text="@string/app_name"
+            android:textSize="28sp"
+            android:textStyle="bold"
+            android:layout_marginBottom="20dp"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content" />
+
+        <RadioGroup
+            android:id="@+id/rgDifficulty"
+            android:orientation="horizontal"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content">
+
+            <RadioButton
+                android:id="@+id/rbEasy"
+                android:text="Easy (0–10)"
+                android:checked="true"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content" />
+
+            <RadioButton
+                android:id="@+id/rbHard"
+                android:text="Hard (0–99)"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginStart="12dp" />
+        </RadioGroup>
 
         <Button
             android:id="@+id/btnCounting"
+            android:text="Counting"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Counting" />
+            android:layout_marginTop="24dp" />
 
         <Button
-            android:id="@+id/btnRecognition"
+            android:id="@+id/btnNumberRecog"
+            android:text="Number Recognition"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Number Recognition"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="12dp" />
 
         <Button
             android:id="@+id/btnMissing"
+            android:text="Missing Number"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="Missing Number"
-            android:layout_marginTop="16dp" />
+            android:layout_marginTop="12dp" />
+
     </LinearLayout>
 
 

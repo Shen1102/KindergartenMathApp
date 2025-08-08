@@ -2,8 +2,6 @@ package com.shen.kindergartenmathapp;
 
 import android.os.Bundle;
 import android.widget.Button;
-import android.widget.GridLayout;
-import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -11,9 +9,8 @@ import androidx.appcompat.app.AppCompatActivity;
 
 import java.util.*;
 
-public class CountingActivity extends AppCompatActivity {
+public class MissingNumberActivity extends AppCompatActivity {
     private TextView titleText, questionText, scoreText;
-    private GridLayout objectsContainer;
     private Button[] opts;
     private Button btnMenu;
     private int answer;
@@ -24,15 +21,14 @@ public class CountingActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_counting);
+        setContentView(R.layout.activity_missing_number);
 
         String diff = getIntent().getStringExtra(MainActivity.EXTRA_DIFFICULTY);
-        if ("HARD".equals(diff)) { lo = 0; hi = 99; } else { lo = 0; hi = 10; }
+        if ("HARD".equals(diff)) { lo = 0; hi = 99; } else { lo = 0; hi = 20; }
 
         titleText = findViewById(R.id.titleText);
         questionText = findViewById(R.id.questionText);
         scoreText = findViewById(R.id.scoreText);
-        objectsContainer = findViewById(R.id.objectsContainer);
         btnMenu = findViewById(R.id.btnMenu);
 
         opts = new Button[]{
@@ -43,17 +39,27 @@ public class CountingActivity extends AppCompatActivity {
         };
         for (Button b : opts) b.setOnClickListener(v -> onPick(Integer.parseInt(b.getText().toString())));
 
-        btnMenu.setOnClickListener(v -> finish()); // go back to main menu
+        btnMenu.setOnClickListener(v -> finish());
 
-        titleText.setText("Counting");
+        titleText.setText("Missing Number");
         nextQuestion();
     }
 
     private void nextQuestion() {
-        int count = randInRange(lo, hi);
-        answer = count;
-        questionText.setText("How many stars are there?");
-        renderObjects(count);
+        int step = (hi > 20) ? randInRange(2, 3) : 1;
+        int start = randInRange(lo, Math.max(lo, hi - step * 4));
+        int[] seq = new int[5];
+        for (int i = 0; i < 5; i++) seq[i] = start + i * step;
+
+        int missIndex = rand.nextInt(5);
+        answer = seq[missIndex];
+
+        StringBuilder q = new StringBuilder("Fill the missing number:\n");
+        for (int i = 0; i < 5; i++) {
+            q.append(i == missIndex ? " ? " : seq[i]);
+            if (i < 4) q.append(", ");
+        }
+        questionText.setText(q.toString());
 
         Set<Integer> set = new HashSet<>();
         set.add(answer);
@@ -61,17 +67,6 @@ public class CountingActivity extends AppCompatActivity {
         List<Integer> list = new ArrayList<>(set);
         Collections.shuffle(list, rand);
         for (int i = 0; i < 4; i++) opts[i].setText(String.valueOf(list.get(i)));
-    }
-
-    private void renderObjects(int n) {
-        objectsContainer.removeAllViews();
-        int pad = dp(4);
-        for (int i = 0; i < n; i++) {
-            ImageView iv = new ImageView(this);
-            iv.setImageResource(R.drawable.ic_star_24);
-            iv.setPadding(pad, pad, pad, pad);
-            objectsContainer.addView(iv);
-        }
     }
 
     private void onPick(int picked) {
@@ -87,6 +82,4 @@ public class CountingActivity extends AppCompatActivity {
     }
 
     private int randInRange(int a, int b) { return a + rand.nextInt(b - a + 1); }
-    private int dp(int v) { return Math.round(getResources().getDisplayMetrics().density * v); }
 }
-

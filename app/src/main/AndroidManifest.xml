@@ -11,6 +11,12 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.KindergartenMathApp">
+
+        <!-- Game activities -->
+        <activity android:name=".CountingActivity" />
+        <activity android:name=".NumberRecognitionActivity" />
+        <activity android:name=".MissingNumberActivity" />
+
         <activity
             android:name=".MainActivity"
             android:exported="true">

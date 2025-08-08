@@ -12,7 +12,7 @@
 
         <TextView
             android:id="@+id/titleText"
-            android:text="Counting"
+            android:text="Number Recognition"
             android:textStyle="bold"
             android:textSize="24sp"
             android:layout_marginBottom="4dp"
@@ -29,25 +29,11 @@
 
         <TextView
             android:id="@+id/questionText"
-            android:text="How many stars are there?"
+            android:text="Which word matches this number: 0 ?"
             android:textSize="18sp"
-            android:layout_marginBottom="12dp"
+            android:layout_marginBottom="20dp"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content" />
-
-        <ScrollView
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1">
-
-            <GridLayout
-                android:id="@+id/objectsContainer"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="10"
-                android:rowOrderPreserved="false"
-                android:useDefaultMargins="false" />
-        </ScrollView>
 
         <Button
             android:id="@+id/opt1"
@@ -76,5 +62,6 @@
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp" />
     </LinearLayout>
+
 
 </androidx.constraintlayout.widget.ConstraintLayout>

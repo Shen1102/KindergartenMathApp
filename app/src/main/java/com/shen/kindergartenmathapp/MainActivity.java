@@ -1,36 +1,46 @@
 package com.shen.kindergartenmathapp;
 
-import android.os.Bundle;
-
-import androidx.activity.EdgeToEdge;
-import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.graphics.Insets;
-import androidx.core.view.ViewCompat;
-import androidx.core.view.WindowInsetsCompat;
 import android.content.Intent;
+import android.os.Bundle;
 import android.widget.Button;
+import android.widget.RadioGroup;
 
+import androidx.appcompat.app.AppCompatActivity;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button btnCounting, btnRecognition, btnMissing;
+    public static final String EXTRA_DIFFICULTY = "difficulty";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        btnCounting = findViewById(R.id.btnCounting);
-        btnRecognition = findViewById(R.id.btnRecognition);
-        btnMissing = findViewById(R.id.btnMissing);
+        RadioGroup rg = findViewById(R.id.rgDifficulty);
+        final String[] diff = new String[]{"EASY"};
+        rg.setOnCheckedChangeListener((group, checkedId) ->
+                diff[0] = (checkedId == R.id.rbEasy) ? "EASY" : "HARD"
+        );
 
-        btnCounting.setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, CountingActivity.class)));
+        Button btnCounting = findViewById(R.id.btnCounting);
+        btnCounting.setOnClickListener(v -> {
+            Intent i = new Intent(this, CountingActivity.class);
+            i.putExtra(EXTRA_DIFFICULTY, diff[0]);
+            startActivity(i);
+        });
 
-        btnRecognition.setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, RecognitionActivity.class)));
+        Button btnNumberRecog = findViewById(R.id.btnNumberRecog);
+        btnNumberRecog.setOnClickListener(v -> {
+            Intent i = new Intent(this, NumberRecognitionActivity.class);
+            i.putExtra(EXTRA_DIFFICULTY, diff[0]);
+            startActivity(i);
+        });
 
-        btnMissing.setOnClickListener(v ->
-                startActivity(new Intent(MainActivity.this, MissingNumberActivity.class)));
+        Button btnMissing = findViewById(R.id.btnMissing);
+        btnMissing.setOnClickListener(v -> {
+            Intent i = new Intent(this, MissingNumberActivity.class);
+            i.putExtra(EXTRA_DIFFICULTY, diff[0]);
+            startActivity(i);
+        });
     }
 }
