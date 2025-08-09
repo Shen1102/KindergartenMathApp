@@ -1,17 +1,21 @@
 package com.shen.kindergartenmathapp;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
+import android.view.Gravity;
 import android.widget.Button;
 import android.widget.GridLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
@@ -23,11 +27,14 @@ import java.util.Set;
 
 public class CountingActivity extends AppCompatActivity {
 
-    private TextView titleText, questionText, scoreText;
+    private TextView questionText, scoreText;
     private GridLayout objectsContainer;
     private Button[] opts;
-    private Button btnMenu, btnNext;
+    private Button btnNext;
     private LinearProgressIndicator progress;
+
+    // Sounds
+    private MediaPlayer correctSound, wrongSound;
 
     private int answer;
     private int lo, hi;
@@ -43,14 +50,22 @@ public class CountingActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_counting);
 
+        // Toolbar
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        // Sounds
+        correctSound = MediaPlayer.create(this, R.raw.correct);
+        wrongSound   = MediaPlayer.create(this, R.raw.wrong);
+
         String diff = getIntent().getStringExtra(MainActivity.EXTRA_DIFFICULTY);
         if ("HARD".equals(diff)) { lo = 0; hi = 99; } else { lo = 0; hi = 10; }
 
-        titleText = findViewById(R.id.titleText);
         questionText = findViewById(R.id.questionText);
         scoreText = findViewById(R.id.scoreText);
         objectsContainer = findViewById(R.id.objectsContainer);
-        btnMenu = findViewById(R.id.btnMenu);
         btnNext = findViewById(R.id.btnNext);
         progress = findViewById(R.id.progress);
 
@@ -61,12 +76,10 @@ public class CountingActivity extends AppCompatActivity {
                 findViewById(R.id.opt4)
         };
 
-        // progress
         progress.setMax(roundSize);
         progress.setProgressCompat(0, false);
 
         for (Button b : opts) b.setOnClickListener(v -> onPick(Integer.parseInt(b.getText().toString())));
-        btnMenu.setOnClickListener(v -> finish());
         btnNext.setOnClickListener(v -> {
             if (waiting) return;
             if (currentQ >= roundSize) { showRoundSummary(); return; }
@@ -74,7 +87,6 @@ public class CountingActivity extends AppCompatActivity {
             nextQuestion();
         });
 
-        titleText.setText("Counting");
         updateScoreUi();
         nextQuestion();
     }
@@ -83,7 +95,7 @@ public class CountingActivity extends AppCompatActivity {
         int count = randInRange(lo, hi);
         answer = count;
         questionText.setText("How many stars are there?");
-        renderObjects(count);
+        objectsContainer.post(() -> renderObjects(count));
 
         Set<Integer> set = new HashSet<>();
         set.add(answer);
@@ -95,17 +107,6 @@ public class CountingActivity extends AppCompatActivity {
             opts[i].setText(String.valueOf(list.get(i)));
             opts[i].setBackgroundTintList(android.content.res.ColorStateList.valueOf(normal));
             opts[i].setEnabled(true);
-        }
-    }
-
-    private void renderObjects(int n) {
-        objectsContainer.removeAllViews();
-        int pad = dp(4);
-        for (int i = 0; i < n; i++) {
-            ImageView iv = new ImageView(this);
-            iv.setImageResource(R.drawable.ic_star_24);
-            iv.setPadding(pad, pad, pad, pad);
-            objectsContainer.addView(iv);
         }
     }
 
@@ -124,6 +125,9 @@ public class CountingActivity extends AppCompatActivity {
         if (clicked != null) showFeedback(clicked, correct);
         setButtonsEnabled(false);
 
+        // Play sound
+        playSound(correct ? correctSound : wrongSound);
+
         Toast.makeText(this, correct ? "Correct!" : "Try again!", Toast.LENGTH_SHORT).show();
         updateScoreUi();
 
@@ -137,6 +141,60 @@ public class CountingActivity extends AppCompatActivity {
             waiting = false;
             nextQuestion();
         }, 700);
+    }
+
+    // Ten-frame grid with responsive squares
+    private void renderObjects(int n) {
+        objectsContainer.removeAllViews();
+        final int COLS = 10;
+        objectsContainer.setColumnCount(COLS);
+
+        int totalBoxes = Math.max(((n + COLS - 1) / COLS) * COLS, COLS);
+
+        int sidePaddingPx = dp(24) * 2;
+        int availablePx = objectsContainer.getWidth();
+        if (availablePx <= 0) {
+            availablePx = getResources().getDisplayMetrics().widthPixels - sidePaddingPx;
+        } else {
+            availablePx -= objectsContainer.getPaddingLeft() + objectsContainer.getPaddingRight();
+        }
+
+        int gapPx = dp(4);
+        int totalGapsPx = (COLS - 1) * gapPx;
+
+        int boxSizePx = (availablePx - totalGapsPx) / COLS;
+        if (boxSizePx < dp(28)) boxSizePx = dp(28);
+
+        int pad = dp(6);
+
+        for (int i = 0; i < totalBoxes; i++) {
+            LinearLayout cell = new LinearLayout(this);
+            cell.setOrientation(LinearLayout.VERTICAL);
+            cell.setGravity(Gravity.CENTER);
+            cell.setBackgroundResource(R.drawable.missing_number_normal);
+            cell.setPadding(pad, pad, pad, pad);
+
+            if (i < n) {
+                ImageView iv = new ImageView(this);
+                iv.setImageResource(R.drawable.ic_star_24);
+                cell.addView(iv, new LinearLayout.LayoutParams(
+                        LinearLayout.LayoutParams.WRAP_CONTENT,
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                ));
+            }
+
+            GridLayout.LayoutParams glp = new GridLayout.LayoutParams();
+            glp.width = boxSizePx;
+            glp.height = boxSizePx;
+            int col = i % COLS;
+            int row = i / COLS;
+            int left = (col == 0) ? 0 : gapPx;
+            int top  = (row == 0) ? 0 : gapPx;
+            glp.setMargins(left, top, 0, 0);
+
+            cell.setLayoutParams(glp);
+            objectsContainer.addView(cell);
+        }
     }
 
     private void setButtonsEnabled(boolean enabled) {
@@ -178,4 +236,19 @@ public class CountingActivity extends AppCompatActivity {
     private int randInRange(int a, int b) { return a + rand.nextInt(b - a + 1); }
     private int dp(int v) { return Math.round(getResources().getDisplayMetrics().density * v); }
     private void updateScoreUi() { scoreText.setText("Score: " + score + "/" + total); }
+
+    private void playSound(MediaPlayer mp) {
+        if (mp == null) return;
+        try {
+            if (mp.isPlaying()) mp.seekTo(0);
+            mp.start();
+        } catch (IllegalStateException ignored) {}
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (correctSound != null) { correctSound.release(); correctSound = null; }
+        if (wrongSound != null)   { wrongSound.release();   wrongSound = null; }
+    }
 }

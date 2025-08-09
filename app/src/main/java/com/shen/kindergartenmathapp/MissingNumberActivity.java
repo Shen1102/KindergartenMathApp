@@ -1,5 +1,6 @@
 package com.shen.kindergartenmathapp;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -12,6 +13,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
@@ -24,11 +26,14 @@ import java.util.Set;
 public class MissingNumberActivity extends AppCompatActivity {
 
     // UI
-    private TextView titleText, scoreText;
+    private TextView scoreText;
     private LinearLayout sequenceContainer;
     private Button[] opts;
-    private Button btnMenu, btnNext;
+    private Button btnNext;
     private LinearProgressIndicator progress;
+
+    // Sounds
+    private MediaPlayer correctSound, wrongSound;
 
     // Game state
     private int answer;
@@ -45,13 +50,21 @@ public class MissingNumberActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_missing_number);
 
+        // Toolbar with back arrow
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
+
+        // Sounds
+        correctSound = MediaPlayer.create(this, R.raw.correct);
+        wrongSound = MediaPlayer.create(this, R.raw.wrong);
+
         String diff = getIntent().getStringExtra(MainActivity.EXTRA_DIFFICULTY);
         if ("HARD".equals(diff)) { lo = 0; hi = 99; } else { lo = 0; hi = 20; }
 
         // Find views
-        titleText = findViewById(R.id.titleText);
         scoreText = findViewById(R.id.scoreText);
-        btnMenu = findViewById(R.id.btnMenu);
         sequenceContainer = findViewById(R.id.sequenceContainer);
         progress = findViewById(R.id.progress);
         btnNext = findViewById(R.id.btnNext);
@@ -67,15 +80,10 @@ public class MissingNumberActivity extends AppCompatActivity {
         progress.setMax(roundSize);
         progress.setProgressCompat(0, false);
 
-        // Manual next (optional; respects waiting + end-of-round)
+        // Manual next (respects waiting + end-of-round)
         btnNext.setOnClickListener(v -> {
             if (waiting) return;
-            // If round is complete, show summary instead of advancing
-            if (currentQ >= roundSize) {
-                showRoundSummary();
-                return;
-            }
-            // Move to a new question without changing score/total
+            if (currentQ >= roundSize) { showRoundSummary(); return; }
             resetButtonStyles();
             nextQuestion();
         });
@@ -85,24 +93,19 @@ public class MissingNumberActivity extends AppCompatActivity {
             b.setOnClickListener(v -> onPick(Integer.parseInt(b.getText().toString())));
         }
 
-        btnMenu.setOnClickListener(v -> finish());
-
-        titleText.setText("Missing Number");
         updateScoreUi();
         nextQuestion();
     }
 
     private void nextQuestion() {
-        // create a simple arithmetic sequence; use step > 1 on higher range
         int step = (hi > 20) ? randInRange(2, 3) : 1;
-        int start = randInRange(lo, Math.max(lo, hi - step * 4)); // ensure room for 5 terms
+        int start = randInRange(lo, Math.max(lo, hi - step * 4));
         int[] seq = new int[5];
         for (int i = 0; i < 5; i++) seq[i] = start + i * step;
 
         int missIndex = rand.nextInt(5);
         answer = seq[missIndex];
 
-        // Clear old sequence and build new "cards"
         sequenceContainer.removeAllViews();
 
         for (int i = 0; i < 5; i++) {
@@ -110,11 +113,11 @@ public class MissingNumberActivity extends AppCompatActivity {
 
             if (i == missIndex) {
                 tv.setText("");
-                tv.setBackgroundResource(R.drawable.missing_number_highlight); // blue dashed bg
+                tv.setBackgroundResource(R.drawable.missing_number_highlight);
                 tv.setContentDescription("Missing number");
             } else {
                 tv.setText(String.valueOf(seq[i]));
-                tv.setBackgroundResource(R.drawable.missing_number_normal);    // gray border bg
+                tv.setBackgroundResource(R.drawable.missing_number_normal);
                 tv.setContentDescription(String.valueOf(seq[i]));
             }
 
@@ -122,7 +125,6 @@ public class MissingNumberActivity extends AppCompatActivity {
             tv.setGravity(Gravity.CENTER);
             tv.setIncludeFontPadding(false);
             tv.setPadding(dp(8), dp(6), dp(8), dp(6));
-            // Uniform size & prevent wrap of two-digit numbers
             tv.setMinWidth(dp(44));
             tv.setMaxWidth(dp(44));
             tv.setMinHeight(dp(44));
@@ -138,14 +140,13 @@ public class MissingNumberActivity extends AppCompatActivity {
             sequenceContainer.addView(tv);
         }
 
-        // Build 4 answer options (include correct + 3 unique distractors)
+        // options
         Set<Integer> set = new HashSet<>();
         set.add(answer);
         while (set.size() < 4) set.add(randInRange(lo, hi));
         List<Integer> list = new ArrayList<>(set);
         Collections.shuffle(list, rand);
 
-        // Set option text and reset base tint each question
         int normal = ContextCompat.getColor(this, R.color.btnNormal);
         for (int i = 0; i < 4; i++) {
             opts[i].setText(String.valueOf(list.get(i)));
@@ -162,7 +163,6 @@ public class MissingNumberActivity extends AppCompatActivity {
         boolean correct = (picked == answer);
         if (correct) score++;
 
-        // find which button was clicked (to color it)
         Button clicked = null;
         for (Button b : opts) {
             if (b.getText().toString().equals(String.valueOf(picked))) { clicked = b; break; }
@@ -171,19 +171,17 @@ public class MissingNumberActivity extends AppCompatActivity {
         if (clicked != null) showFeedback(clicked, correct);
         setButtonsEnabled(false);
 
+        // Play sound
+        playSound(correct ? correctSound : wrongSound);
+
         Toast.makeText(this, correct ? "Correct!" : "Try again!", Toast.LENGTH_SHORT).show();
         updateScoreUi();
 
-        // progress
         currentQ++;
         progress.setProgressCompat(Math.min(currentQ, roundSize), true);
 
-        // auto-advance; on round-end show summary and STOP there
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            if (currentQ >= roundSize) {
-                showRoundSummary();   // do not reset here; wait for user choice
-                return;
-            }
+            if (currentQ >= roundSize) { showRoundSummary(); return; }
             resetButtonStyles();
             setButtonsEnabled(true);
             waiting = false;
@@ -191,7 +189,7 @@ public class MissingNumberActivity extends AppCompatActivity {
         }, 700);
     }
 
-    // --- helpers ---
+    // helpers
 
     private void setButtonsEnabled(boolean enabled) {
         for (Button b : opts) b.setEnabled(enabled);
@@ -217,10 +215,7 @@ public class MissingNumberActivity extends AppCompatActivity {
                 .setMessage(msg)
                 .setCancelable(false)
                 .setPositiveButton("Play again", (d, w) -> {
-                    // Reset state ONLY when the user chooses to play again
-                    score = 0;
-                    total = 0;
-                    currentQ = 0;
+                    score = 0; total = 0; currentQ = 0;
                     progress.setProgressCompat(0, false);
                     updateScoreUi();
                     resetButtonStyles();
@@ -233,8 +228,21 @@ public class MissingNumberActivity extends AppCompatActivity {
     }
 
     private int randInRange(int a, int b) { return a + rand.nextInt(b - a + 1); }
-
     private int dp(int v) { return Math.round(getResources().getDisplayMetrics().density * v); }
-
     private void updateScoreUi() { scoreText.setText("Score: " + score + "/" + total); }
+
+    private void playSound(MediaPlayer mp) {
+        if (mp == null) return;
+        try {
+            if (mp.isPlaying()) mp.seekTo(0);
+            mp.start();
+        } catch (IllegalStateException ignored) {}
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (correctSound != null) { correctSound.release(); correctSound = null; }
+        if (wrongSound != null)   { wrongSound.release();   wrongSound = null; }
+    }
 }

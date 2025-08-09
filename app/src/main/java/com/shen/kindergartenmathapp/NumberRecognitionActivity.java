@@ -1,5 +1,6 @@
 package com.shen.kindergartenmathapp;
 
+import android.media.MediaPlayer;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
@@ -10,6 +11,7 @@ import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.content.ContextCompat;
 
+import com.google.android.material.appbar.MaterialToolbar;
 import com.google.android.material.progressindicator.LinearProgressIndicator;
 
 import java.util.ArrayList;
@@ -21,10 +23,13 @@ import java.util.Set;
 
 public class NumberRecognitionActivity extends AppCompatActivity {
 
-    private TextView titleText, questionText, scoreText;
+    private TextView questionText, numberText, scoreText;
     private Button[] opts;
-    private Button btnMenu, btnNext;
+    private Button btnNext;
     private LinearProgressIndicator progress;
+
+    // Sounds
+    private MediaPlayer correctSound, wrongSound;
 
     private int answer;
     private int lo, hi;
@@ -35,25 +40,29 @@ public class NumberRecognitionActivity extends AppCompatActivity {
     private int currentQ = 0;
     private boolean waiting = false;
 
-    private static final String[] NUMBER_WORDS = {
-            "zero","one","two","three","four","five","six","seven","eight","nine","ten",
-            "eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen","twenty"
-    };
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_number_recognition);
 
-        String diff = getIntent().getStringExtra(MainActivity.EXTRA_DIFFICULTY);
-        if ("HARD".equals(diff)) { lo = 0; hi = 20; } else { lo = 0; hi = 10; }
+        // Toolbar with back arrow
+        MaterialToolbar toolbar = findViewById(R.id.toolbar);
+        setSupportActionBar(toolbar);
+        if (getSupportActionBar() != null) getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        toolbar.setNavigationOnClickListener(v -> getOnBackPressedDispatcher().onBackPressed());
 
-        titleText = findViewById(R.id.titleText);
+        // Sounds
+        correctSound = MediaPlayer.create(this, R.raw.correct);
+        wrongSound   = MediaPlayer.create(this, R.raw.wrong);
+
+        String diff = getIntent().getStringExtra(MainActivity.EXTRA_DIFFICULTY);
+        if ("HARD".equals(diff)) { lo = 0; hi = 99; } else { lo = 0; hi = 10; }
+
         questionText = findViewById(R.id.questionText);
-        scoreText = findViewById(R.id.scoreText);
-        btnMenu = findViewById(R.id.btnMenu);
-        btnNext = findViewById(R.id.btnNext);
-        progress = findViewById(R.id.progress);
+        numberText   = findViewById(R.id.numberText);
+        scoreText    = findViewById(R.id.scoreText);
+        btnNext      = findViewById(R.id.btnNext);
+        progress     = findViewById(R.id.progress);
 
         opts = new Button[] {
                 findViewById(R.id.opt1),
@@ -66,7 +75,6 @@ public class NumberRecognitionActivity extends AppCompatActivity {
         progress.setProgressCompat(0, false);
 
         for (Button b : opts) b.setOnClickListener(v -> onPick(b.getText().toString()));
-        btnMenu.setOnClickListener(v -> finish());
         btnNext.setOnClickListener(v -> {
             if (waiting) return;
             if (currentQ >= roundSize) { showRoundSummary(); return; }
@@ -74,24 +82,27 @@ public class NumberRecognitionActivity extends AppCompatActivity {
             nextQuestion();
         });
 
-        titleText.setText("Number Recognition");
         updateScoreUi();
         nextQuestion();
     }
 
     private void nextQuestion() {
         answer = randInRange(lo, hi);
-        questionText.setText("Which word matches this number: " + answer + " ?");
 
-        Set<String> set = new HashSet<>();
-        set.add(NUMBER_WORDS[answer]);
-        while (set.size() < 4) set.add(NUMBER_WORDS[randInRange(lo, hi)]);
-        List<String> list = new ArrayList<>(set);
-        Collections.shuffle(list, rand);
+        questionText.setText("Which word matches this number?");
+        numberText.setText(String.valueOf(answer));
+
+        // Build 4 options from 0..hi
+        Set<Integer> nums = new HashSet<>();
+        nums.add(answer);
+        while (nums.size() < 4) nums.add(randInRange(lo, hi));
+        List<Integer> numList = new ArrayList<>(nums);
+        Collections.shuffle(numList, rand);
 
         int normal = ContextCompat.getColor(this, R.color.btnNormal);
         for (int i = 0; i < 4; i++) {
-            opts[i].setText(list.get(i));
+            String word = numberToWords(numList.get(i));
+            opts[i].setText(word);
             opts[i].setBackgroundTintList(android.content.res.ColorStateList.valueOf(normal));
             opts[i].setEnabled(true);
         }
@@ -102,7 +113,7 @@ public class NumberRecognitionActivity extends AppCompatActivity {
         waiting = true;
 
         total++;
-        boolean correct = pickedWord.equalsIgnoreCase(NUMBER_WORDS[answer]);
+        boolean correct = pickedWord.equalsIgnoreCase(numberToWords(answer));
         if (correct) score++;
 
         Button clicked = null;
@@ -111,6 +122,9 @@ public class NumberRecognitionActivity extends AppCompatActivity {
         }
         if (clicked != null) showFeedback(clicked, correct);
         setButtonsEnabled(false);
+
+        // Play sound
+        playSound(correct ? correctSound : wrongSound);
 
         Toast.makeText(this, correct ? "Correct!" : "Try again!", Toast.LENGTH_SHORT).show();
         updateScoreUi();
@@ -165,4 +179,33 @@ public class NumberRecognitionActivity extends AppCompatActivity {
 
     private int randInRange(int a, int b) { return a + rand.nextInt(b - a + 1); }
     private void updateScoreUi() { scoreText.setText("Score: " + score + "/" + total); }
+
+    private void playSound(MediaPlayer mp) {
+        if (mp == null) return;
+        try {
+            if (mp.isPlaying()) mp.seekTo(0);
+            mp.start();
+        } catch (IllegalStateException ignored) {}
+    }
+
+    // 0..99 to words (lowercase; hyphen between tens and ones)
+    private String numberToWords(int n) {
+        final String[] ones = {
+                "zero","one","two","three","four","five","six","seven","eight","nine",
+                "ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"
+        };
+        final String[] tens = {"", "", "twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"};
+
+        if (n < 20) return ones[n];
+        int t = n / 10, o = n % 10;
+        if (o == 0) return tens[t];
+        return tens[t] + "-" + ones[o];
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        if (correctSound != null) { correctSound.release(); correctSound = null; }
+        if (wrongSound != null)   { wrongSound.release();   wrongSound = null; }
+    }
 }
