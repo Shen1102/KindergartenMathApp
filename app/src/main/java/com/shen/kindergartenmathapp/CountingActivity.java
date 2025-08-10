@@ -151,19 +151,27 @@ public class CountingActivity extends AppCompatActivity {
 
         int totalBoxes = Math.max(((n + COLS - 1) / COLS) * COLS, COLS);
 
-        int sidePaddingPx = dp(24) * 2;
+        // --- spacing + safe padding so last col isn't clipped
+        int gapPx = dp(4);
+        objectsContainer.setPadding(gapPx, 0, gapPx, 0);   // add a tiny side padding
+        objectsContainer.setClipToPadding(false);
+
+        // measure available width
         int availablePx = objectsContainer.getWidth();
         if (availablePx <= 0) {
-            availablePx = getResources().getDisplayMetrics().widthPixels - sidePaddingPx;
+            // fallback early-measure: screen width minus parent side padding (~24dp each)
+            int sidePaddingPx = dp(24) * 2;
+            availablePx = getResources().getDisplayMetrics().widthPixels - sidePaddingPx
+                    - objectsContainer.getPaddingLeft() - objectsContainer.getPaddingRight();
         } else {
             availablePx -= objectsContainer.getPaddingLeft() + objectsContainer.getPaddingRight();
         }
 
-        int gapPx = dp(4);
+        // compute per-column size with remainder distribution
         int totalGapsPx = (COLS - 1) * gapPx;
-
-        int boxSizePx = (availablePx - totalGapsPx) / COLS;
-        if (boxSizePx < dp(28)) boxSizePx = dp(28);
+        int contentPx   = Math.max(0, availablePx - totalGapsPx);
+        int base        = contentPx / COLS;          // floor
+        int remainder   = contentPx % COLS;          // leftover pixels
 
         int pad = dp(6);
 
@@ -183,11 +191,16 @@ public class CountingActivity extends AppCompatActivity {
                 ));
             }
 
-            GridLayout.LayoutParams glp = new GridLayout.LayoutParams();
-            glp.width = boxSizePx;
-            glp.height = boxSizePx;
             int col = i % COLS;
             int row = i / COLS;
+
+            // give the first 'remainder' columns +1px so the row exactly fills content width
+            int boxSizePx = base + (col < remainder ? 1 : 0);
+
+            GridLayout.LayoutParams glp = new GridLayout.LayoutParams();
+            glp.width  = boxSizePx;
+            glp.height = boxSizePx;
+
             int left = (col == 0) ? 0 : gapPx;
             int top  = (row == 0) ? 0 : gapPx;
             glp.setMargins(left, top, 0, 0);
@@ -196,6 +209,7 @@ public class CountingActivity extends AppCompatActivity {
             objectsContainer.addView(cell);
         }
     }
+
 
     private void setButtonsEnabled(boolean enabled) {
         for (Button b : opts) b.setEnabled(enabled);

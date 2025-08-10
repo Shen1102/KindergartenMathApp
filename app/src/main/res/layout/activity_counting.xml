@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
@@ -22,15 +23,17 @@
         android:layout_height="match_parent"
         app:layout_behavior="@string/appbar_scrolling_view_behavior">
 
-        <!-- Top section -->
+        <!-- TOP: fixed header + scrolling stars only -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="1"
             android:gravity="center_horizontal"
-            android:padding="24dp">
+            android:padding="24dp"
+            android:paddingBottom="8dp">
 
+            <!-- fixed header (does NOT scroll) -->
             <TextView
                 android:id="@+id/scoreText"
                 android:text="Score: 0/0"
@@ -53,21 +56,30 @@
                 android:text="How many stars are there?"
                 android:textSize="18sp"
                 android:gravity="center"
-                android:layout_marginBottom="12dp"
+                android:layout_marginBottom="8dp"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content" />
 
-            <GridLayout
-                android:id="@+id/objectsContainer"
+            <!-- ONLY the stars scroll -->
+            <androidx.core.widget.NestedScrollView
+                android:id="@+id/starScroll"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:columnCount="10"
-                android:rowOrderPreserved="false"
-                android:useDefaultMargins="false"
-                android:layout_marginBottom="16dp" />
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:fillViewport="true">
+
+                <GridLayout
+                    android:id="@+id/objectsContainer"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:columnCount="10"
+                    android:rowOrderPreserved="false"
+                    android:useDefaultMargins="false"
+                    android:layout_marginBottom="16dp" />
+            </androidx.core.widget.NestedScrollView>
         </LinearLayout>
 
-        <!-- Bottom section -->
+        <!-- Bottom section (unchanged) -->
         <LinearLayout
             android:orientation="vertical"
             android:layout_width="match_parent"
@@ -101,13 +113,17 @@
                 android:layout_height="wrap_content"
                 android:layout_marginTop="8dp" />
 
+            <!-- Big gap before Next -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="50dp" />
+
             <com.google.android.material.button.MaterialButton
                 android:id="@+id/btnNext"
                 android:text="Next"
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                app:backgroundTint="@color/darkBlue"
-                android:layout_marginTop="26dp" />
+                android:layout_height="wrap_content" />
         </LinearLayout>
     </LinearLayout>
+
 </androidx.coordinatorlayout.widget.CoordinatorLayout>
