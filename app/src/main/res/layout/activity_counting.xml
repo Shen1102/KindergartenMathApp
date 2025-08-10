@@ -107,7 +107,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:backgroundTint="@color/darkBlue"
-                android:layout_marginTop="12dp" />
+                android:layout_marginTop="26dp" />
         </LinearLayout>
     </LinearLayout>
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

@@ -191,10 +191,10 @@ public class NumberRecognitionActivity extends AppCompatActivity {
     // 0..99 to words (lowercase; hyphen between tens and ones)
     private String numberToWords(int n) {
         final String[] ones = {
-                "zero","one","two","three","four","five","six","seven","eight","nine",
-                "ten","eleven","twelve","thirteen","fourteen","fifteen","sixteen","seventeen","eighteen","nineteen"
+                "Zero","One","Two","Three","Four","Five","Six","Seven","Eight","Nine",
+                "Ten","Eleven","Twelve","Thirteen","Fourteen","Fifteen","Sixteen","Seventeen","Eighteen","Nineteen"
         };
-        final String[] tens = {"", "", "twenty","thirty","forty","fifty","sixty","seventy","eighty","ninety"};
+        final String[] tens = {"", "", "Twenty","Thirty","Forty","Fifty","Sixty","Seventy","Eighty","Ninety"};
 
         if (n < 20) return ones[n];
         int t = n / 10, o = n % 10;
