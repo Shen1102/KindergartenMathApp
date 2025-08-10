@@ -4,10 +4,12 @@
     <color name="white">#FFFFFFFF</color>
     <color name="correctGreen">#4CAF50</color>
     <color name="wrongRed">#F44336</color>
-    <color name="btnNormal">#2196F3</color>
+    <color name="btnNormal">#8AB6F9</color>
     <color name="btnDisabled">#BDBDBD</color>
     <color name="menuGreen">#43A047</color>   <!-- Material Green 600 -->
     <color name="menuBlue">#1E88E5</color>    <!-- Material Blue 600 -->
     <color name="menuOrange">#FB8C00</color>  <!-- Material Orange 600 -->
-
+    <color name="lightBlue">#CADCFC</color>
+    <color name="mediumBlue"> #8AB6F9</color>
+    <color name="darkBlue">#00246B</color>
 </resources>

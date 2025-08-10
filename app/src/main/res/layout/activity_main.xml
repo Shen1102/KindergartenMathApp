@@ -13,19 +13,29 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Title -->
-        <TextView
-            android:id="@+id/title"
-            android:text="Tako Maths!"
-            android:textSize="36sp"
-            android:textStyle="bold"
-            android:textColor="#FF4081"
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_marginTop="32dp"
-            android:layout_marginBottom="28dp" />
+        <!-- Logo at the top -->
+
+
+        <!-- Spacer pushes toggle + buttons down -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="169dp"
+            android:layout_weight="1" />
+
+        <ImageView
+            android:layout_width="match_parent"
+            android:layout_height="160dp"
+            android:adjustViewBounds="true"
+            android:scaleType="fitCenter"
+            android:src="@drawable/tako_logo" />
 
         <!-- Difficulty -->
+        <View
+            android:id="@+id/view"
+            android:layout_width="match_parent"
+            android:layout_height="169dp"
+            android:layout_weight="1" />
+
         <RadioGroup
             android:id="@+id/rgDifficulty"
             android:orientation="horizontal"
@@ -50,17 +60,11 @@
                 android:layout_marginStart="16dp" />
         </RadioGroup>
 
-        <!-- Spacer pushes buttons down -->
-        <View
-            android:layout_width="match_parent"
-            android:layout_height="0dp"
-            android:layout_weight="1" />
-
         <!-- Big rounded buttons -->
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnCounting"
             style="?attr/materialButtonStyle"
-            android:text="Compare Numbers"
+            android:text="Counting"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textSize="18sp"
@@ -70,12 +74,12 @@
             android:layout_marginBottom="20dp"
             app:cornerRadius="24dp"
             app:elevation="8dp"
-            app:backgroundTint="@color/menuGreen" />
+            app:backgroundTint="@color/lightBlue" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnNumberRecog"
             style="?attr/materialButtonStyle"
-            android:text="Arrange Numbers"
+            android:text="Numbers Recognition"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textSize="18sp"
@@ -85,12 +89,12 @@
             android:layout_marginBottom="20dp"
             app:cornerRadius="24dp"
             app:elevation="8dp"
-            app:backgroundTint="@color/menuBlue" />
+            app:backgroundTint="@color/mediumBlue" />
 
         <com.google.android.material.button.MaterialButton
             android:id="@+id/btnMissing"
             style="?attr/materialButtonStyle"
-            android:text="Compose Numbers"
+            android:text="Missing Number"
             android:textAllCaps="false"
             android:textStyle="bold"
             android:textSize="18sp"
@@ -99,7 +103,7 @@
             android:layout_height="64dp"
             app:cornerRadius="24dp"
             app:elevation="8dp"
-            app:backgroundTint="@color/menuOrange" />
+            app:backgroundTint="@color/darkBlue" />
     </LinearLayout>
 
 </androidx.coordinatorlayout.widget.CoordinatorLayout>

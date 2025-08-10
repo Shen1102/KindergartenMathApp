@@ -98,7 +98,7 @@ public class MissingNumberActivity extends AppCompatActivity {
     }
 
     private void nextQuestion() {
-        int step = (hi > 20) ? randInRange(2, 3) : 1;
+        int step = (hi > 20) ? randInRange(1, 5) : 1;
         int start = randInRange(lo, Math.max(lo, hi - step * 4));
         int[] seq = new int[5];
         for (int i = 0; i < 5; i++) seq[i] = start + i * step;
