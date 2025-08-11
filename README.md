@@ -59,7 +59,7 @@ No special permissions are required based on current code.
 
 # 🧩 Game Modes
 
-1) Counting (implemented)
+1) Counting
 
 Goal: Count the number of stars displayed in a responsive 10-column grid and pick the correct number.
 
@@ -87,8 +87,7 @@ HARD: lo = 0, hi = 99
 
 
 
-2) Number Recognition (planned)
-
+2) Number Recognition
 Goal: Show a numeral; child chooses the matching option.
 
 10 questions per round (roundSize = 10)
@@ -112,7 +111,7 @@ EASY: lo = 0, hi = 10
 HARD: lo = 0, hi = 99
 
 
-3) Missing Number (planned)
+3) Missing Number
 
 Goal: Show a short sequence with a gap (e.g., 3, 4, __, 6); child selects the missing number.
 
@@ -135,7 +134,8 @@ Difficulty ranges in Counting:
 EASY: lo = 0, hi = 10
 
 HARD: lo = 0, hi = 99
-📄 License
+
+# 📄 License
 
 Choose a license (MIT/Apache-2.0) and place the file at /LICENSE. Update this section to reference it.
 
