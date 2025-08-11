@@ -137,7 +137,7 @@ HARD: lo = 0, hi = 99
 
 # 📄 License
 
-Choose a license (MIT/Apache-2.0) and place the file at /LICENSE. Update this section to reference it.
+This project contains copyrighted content; the icon used shall not be distributed for commercial use. 
 
 🙌 Credits
 
