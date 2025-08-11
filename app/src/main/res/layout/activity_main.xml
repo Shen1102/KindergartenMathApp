@@ -13,15 +13,12 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent">
 
-        <!-- Logo at the top -->
-
-
         <!-- Spacer pushes toggle + buttons down -->
         <View
             android:layout_width="match_parent"
             android:layout_height="169dp"
             android:layout_weight="1" />
-
+        <!-- Logo at the top -->
         <ImageView
             android:layout_width="match_parent"
             android:layout_height="160dp"
