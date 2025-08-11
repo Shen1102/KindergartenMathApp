@@ -21,20 +21,20 @@ Default difficulty is EASY. HARD expands the number range.
 Add images to docs/images and link them here.
 
 Home
+
 <img width="314" height="697" alt="image" src="https://github.com/user-attachments/assets/d1dcca3f-9b2e-47ed-a341-5d611dd35a3e" />
 
-
 Counting
+
 <img width="291" height="650" alt="image" src="https://github.com/user-attachments/assets/09278cf9-01d1-496e-bd36-6b7a46dc6b7d" />
 
-
 Number Recognition
+
 <img width="292" height="652" alt="image" src="https://github.com/user-attachments/assets/156232d3-f38a-43ba-94be-7fa2c9c0983f" />
 
-
 Missing Number
-<img width="295" height="659" alt="image" src="https://github.com/user-attachments/assets/f41fe771-a5a9-4a2d-b80d-d7343f3d0969" />
 
+<img width="295" height="659" alt="image" src="https://github.com/user-attachments/assets/f41fe771-a5a9-4a2d-b80d-d7343f3d0969" />
 
 # 🚀 Getting Started
 
